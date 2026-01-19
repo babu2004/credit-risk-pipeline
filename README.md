@@ -83,7 +83,7 @@ This project exposes predictions through a **FastAPI REST API**, making it easy 
 
 ### Clone the Repository
 ```bash
-git clone https://github.com/your-username/credit-risk-default-prediction.git
+git clone https://github.com/babu2004/credit-risk-pipeline.git
 cd credit-risk-default-prediction
 ```
 
