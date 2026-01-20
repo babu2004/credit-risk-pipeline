@@ -71,9 +71,10 @@ def predict(application: CreditApplication):
     prob_default = model.predict(dmatrix)[0]
 
     # Decision threshold
-    prediction = "DEFAULT" if prob_default >= 0.5 else "NOT DEFAULT"
+    prediction = "NOT ELIGIBLE" if prob_default >= 0.5 else "ELIGIBLE"
 
     return {
-        "prediction": prediction,
-        "probability_of_default": round(float(prob_default), 4)
-    }
+    "prediction": prediction,
+    "Probability of able to pay the loan:": f"{round((1 - 0.23) * 100, 2)}%"
+}
+
