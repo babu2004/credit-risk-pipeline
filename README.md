@@ -1,108 +1,51 @@
-# Credit-Risk-Default-Prediction  
-Predicting Loan Default Risk Using Machine Learning 💳📊
+# Credit Risk Scoring Project
 
-Hey there! 👋 Welcome to my machine learning project, where I focus on predicting whether a loan applicant is likely to **default or not default**. This project demonstrates how machine learning and modern MLOps practices can help financial institutions assess credit risk more accurately and consistently.
+## Overview
+This project focuses on building and evaluating machine learning models to predict credit risk. The goal is to identify customers who are likely to default on their loans based on various demographic and financial features. This notebook explores Decision Trees, Random Forests, and XGBoost models, including parameter tuning and performance comparison.
 
-The entire pipeline is designed to be **reproducible, scalable, and production-ready**, so you can easily run it locally or deploy it using Docker. ✨  
-The project takes a structured credit dataset and builds an **end-to-end ML system**, from training and evaluation to a REST API for real-time predictions.
+## Dataset
+The dataset used in this project is `CreditScoring.csv`. It contains information about loan applicants, including their status (ok/default), seniority, home ownership, age, marital status, records, job type, expenses, income, assets, debt, loan amount, and price.
 
-The goal?  
-Help financial institutions make **better, data-driven lending decisions**, reduce risk, and improve customer outcomes using AI.
+## Data Preprocessing and Preparation
+1.  **Loading Data**: The `CreditScoring.csv` file is loaded into a pandas DataFrame.
+2.  **Column Renaming**: Column names are standardized to lowercase and spaces are replaced with underscores.
+3.  **Categorical Variable Re-encoding**: Numerical categorical features (status, home, marital, records, job) are mapped to more descriptive string values.
+4.  **Handling Missing Values**: Specific numerical values (e.g., 99999999) representing missing data in 'income', 'assets', and 'debt' columns are replaced with `np.nan`.
+5.  **Filtering Unknown Status**: Rows with 'unknown' status are removed from the dataset.
+6.  **Train/Validation/Test Split**: The dataset is split into training, validation, and test sets using `train_test_split` with a 60/20/20 ratio (full train -> train/val -> test).
+7.  **Target Variable Preparation**: The 'status' column is converted into a binary target variable (`y_train`, `y_val`, `y_test`), where 'default' is 1 and 'ok' is 0.
+8.  **Feature Vectorization**: Categorical features are converted into numerical representations using `DictVectorizer`.
 
----
+## Models and Tuning
+### 1. Decision Tree Classifier
+*   **Initial Training**: A Decision Tree Classifier is trained with `max_depth=3`.
+*   **Hyperparameter Tuning**: The `max_depth` and `min_samples_leaf` parameters are tuned to find the optimal configuration based on AUC scores on the validation set. A heatmap is used to visualize the performance across different parameter combinations.
+*   **Final Model**: The best performing Decision Tree uses `max_depth=6` and `min_samples_leaf=20`.
 
-## 📝 Problem Description
+### 2. Random Forest Classifier
+*   **Initial Training**: A Random Forest Classifier is trained with `n_estimators=10`.
+*   **Hyperparameter Tuning**: `n_estimators`, `max_depth`, and `min_samples_leaf` are tuned to optimize performance.
+    *   `n_estimators`: Explored from 10 to 200. Performance stabilizes around 130-190 estimators.
+    *   `max_depth`: Explored depths of 5, 10, and 15, with `max_depth=10` showing superior performance.
+    *   `min_samples_leaf`: Explored values 1, 3, 5, 10, 15 with `min_samples_leaf=3` giving good results.
+*   **Final Model**: The best Random Forest model uses `n_estimators=200`, `max_depth=10`, and `min_samples_leaf=3`.
 
-Credit risk assessment is a critical task in the financial industry. Incorrect decisions can lead to:
-- Financial losses due to loan defaults
-- Missed opportunities by rejecting low-risk applicants
+### 3. XGBoost Classifier
+*   **Data Preparation**: Data is converted into `DMatrix` format, optimized for XGBoost.
+*   **Initial Training**: An XGBoost model is trained with `eta=0.3`, `max_depth=6`, and `min_child_weight=1`.
+*   **Hyperparameter Tuning**: `eta`, `max_depth`, and `min_child_weight` are tuned.
+    *   `eta`: Explored values like 0.3, 0.1, 0.05. `eta=0.1` showed good balance between convergence and performance.
+    *   `max_depth`: Explored values like 3, 4, 6. `max_depth=3` appeared to be optimal.
+    *   `min_child_weight`: Explored values. `min_child_weight=1` was kept as the default due to no significant improvement with other values.
+*   **Final Model**: The optimized XGBoost model uses `eta=0.1`, `max_depth=3`, and `min_child_weight=1` with 175 boosting rounds.
 
-Traditional rule-based systems struggle to capture complex patterns in customer data. This project shows how **machine learning models** can improve default prediction accuracy by learning from historical data.
+## Results and Model Comparison
+The Area Under the Receiver Operating Characteristic Curve (AUC) is used as the primary evaluation metric.
 
----
+| Model             | Validation AUC |
+| :---------------- | :------------- |
+| Decision Tree     | 0.771          |
+| Random Forest     | 0.823          |
+| XGBoost           | 0.831          |
 
-## 🎯 Objective
-
-The objective of this project is to build a machine learning model that predicts whether a customer will **default or not default** on a loan, based on financial and demographic attributes.
-
----
-
-## 📊 Dataset
-
-This project uses a **credit risk dataset** containing customer financial and demographic information.  
-The data is **already numerically encoded**, making it suitable for tree-based models.
-
-**Features include:**
-- Seniority
-- Home ownership
-- Employment and marital status
-- Income, expenses, assets, and debt
-- Loan amount and price
-
-**Target variable:**
-- `Status`  
-  - `1` → Default  
-  - `0` → Not Default  
-
-For more detailed information about the dataset and column definitions, please refer to the `data/` directory.
-
----
-
-## 🧠 Models Used
-
-The following models are trained and evaluated:
-
-- Decision Tree Classifier  
-- Random Forest Classifier  
-- XGBoost (final deployed model)
-
-Models are compared using **ROC-AUC**, and the best-performing model is used for inference.
-
----
-
-## 🚀 Live Prediction via REST API
-
-This project exposes predictions through a **FastAPI REST API**, making it easy to integrate with:
-- Web applications
-- Mobile apps
-- Backend services
-- Postman or curl
-
----
-
-## 🔧 Tools & Techniques
-
-- Machine Learning: scikit-learn, XGBoost  
-- API Framework: FastAPI  
-- Containerization: Docker  
-- Data Processing: pandas  
-
----
-
-## ✨ Setup
-
-### Clone the Repository
-```bash
-git clone https://github.com/babu2004/credit-risk-pipeline.git
-cd credit-risk-default-prediction
-```
-
-### Install Dependencies
-```bash
-pip install -r requirements.txt
-```
-
-### Run the API
-```bash
-uvicorn src.api:app --reload
-```
-
-Open:
-- http://127.0.0.1:8000/
-- http://127.0.0.1:8000/docs
-
----
-
-## 🚦 Get Going
-
-Train models, start the API, and send prediction requests to get **DEFAULT / NOT DEFAULT** results.
+**Conclusion**: The XGBoost model achieved the highest AUC score on the validation set, indicating it is the best-performing model for this credit risk scoring task among the three evaluated models. The Random Forest model also performed very well, closely following XGBoost.
